@@ -1,4 +1,6 @@
+import { useContext } from "react";
 import { Form, redirect } from "react-router";
+import { AuthContext } from "~/context/AuthController";
 
 export function meta() {
   return [
@@ -37,6 +39,12 @@ export async function action({ request }: { request: Request }) {
 }
 
 export default function Register() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("AuthContext não encontrado");
+  }
+  const { registerUser, updateRegisterInfo } = context;
+
   return (
     <div className="flex min-h-screen items-center justify-center">
       <Form method="post" className="flex flex-col gap-4 w-80">
@@ -49,6 +57,10 @@ export default function Register() {
             type="text"
             id="username"
             name="username"
+            value={registerUser.username}
+            onChange={(e) =>
+              updateRegisterInfo({ ...registerUser, username: e.target.value })
+            }
           />
         </div>
 
@@ -59,6 +71,10 @@ export default function Register() {
             type="email"
             id="email"
             name="email"
+            value={registerUser.email}
+            onChange={(e) =>
+              updateRegisterInfo({ ...registerUser, email: e.target.value })
+            }
           />
         </div>
 
@@ -69,6 +85,10 @@ export default function Register() {
             type="password"
             id="password"
             name="password"
+            value={registerUser.password}
+            onChange={(e) =>
+              updateRegisterInfo({ ...registerUser, password: e.target.value })
+            }
           />
         </div>
 
