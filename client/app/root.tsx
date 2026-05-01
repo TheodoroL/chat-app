@@ -37,8 +37,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <Navbar />
-        {children}
+        <AuthContextProvider>
+          <Navbar />
+          {children}
+        </AuthContextProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -47,13 +49,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return (
-    <>
-      <AuthContextProvider>
-        <Outlet />
-      </AuthContextProvider>
-    </>
-  );
+  return <Outlet />;
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

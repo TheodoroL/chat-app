@@ -26,7 +26,12 @@ export async function RegisterUser(req: FastifyRequest, reply: FastifyReply) {
     const createToken = generateJwt(user._id.toString());
     await user.save();
 
-    reply.status(200).send({ token: createToken });
+    reply
+      .status(200)
+      .send({
+        token: createToken,
+        user: { name: user.name, email: user.email },
+      });
   } catch (err) {
     console.error(err);
     return reply.status(500).send({ message: "Internal server error" });
@@ -54,7 +59,10 @@ export async function LoginUser(req: FastifyRequest, reply: FastifyReply) {
 
     const createToken = generateJwt(findUser._id.toString());
 
-    reply.status(200).send({ token: createToken });
+    reply.status(200).send({
+      token: createToken,
+      user: { name: findUser.name, email: findUser.email },
+    });
   } catch (err) {
     console.error(err);
     return reply.status(500).send({ message: "Internal server error" });

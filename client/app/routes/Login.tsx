@@ -1,4 +1,6 @@
-import { Form, redirect } from "react-router";
+import { redirect, useNavigate } from "react-router";
+import { useContext, useEffect } from "react";
+import { AuthContext } from "~/context/AuthController";
 
 export function meta() {
   return [
@@ -7,36 +9,65 @@ export function meta() {
   ];
 }
 
-export async function action({ request }: { request: Request }) {
-  const formData = await request.formData();
+export async function loader({ request }: { request: Request }) {
+  const cookieHeader = request.headers.get("Cookie");
+  const token = cookieHeader
+    ?.split(";")
+    .find((c) => c.trim().startsWith("authToken="))
+    ?.split("=")[1];
 
-  const email = formData.get("email");
-  const password = formData.get("password");
-
-  // validação básica
-
-  // chamada para seu backend
-  const res = await fetch("http://localhost:3000/register", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ email, password }),
-  });
-
-  if (!res.ok) {
-    return { error: "Erro ao registrar usuário" };
+  if (token) {
+    return redirect("/");
   }
-
-  // redireciona após sucesso
-  return redirect("/login");
+  return null;
 }
 
-export default function Register() {
+export default function Login() {
+  const context = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  if (!context) {
+    throw new Error("AuthContext não encontrado");
+  }
+
+  const {
+    loginData,
+    setLoginData,
+    loginUser,
+    isLoading,
+    isRegisterError,
+    authToken,
+  } = context;
+
+  useEffect(() => {
+    if (authToken) {
+      navigate("/");
+    }
+  }, [authToken, navigate]);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    loginUser();
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <Form method="post" className="flex flex-col gap-4 w-80">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-80">
         <h2 className="text-2xl font-bold text-center">Login</h2>
+
+        {isRegisterError && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded">
+            {Array.isArray(isRegisterError.message) ? (
+              <ul>
+                {isRegisterError.message.map((msg, i) => (
+                  <li key={i}>{msg}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>{isRegisterError.message}</p>
+            )}
+          </div>
+        )}
 
         <div className="flex flex-col">
           <label htmlFor="email">Email</label>
@@ -46,6 +77,11 @@ export default function Register() {
             type="email"
             id="email"
             name="email"
+            value={loginData.email}
+            onChange={(e) =>
+              setLoginData({ ...loginData, email: e.target.value })
+            }
+            required
           />
         </div>
 
@@ -57,11 +93,22 @@ export default function Register() {
             type="password"
             id="password"
             name="password"
+            value={loginData.password}
+            onChange={(e) =>
+              setLoginData({ ...loginData, password: e.target.value })
+            }
+            required
           />
         </div>
 
-        <button className="bg-blue-500 text-white p-2 rounded">Entrar</button>
-      </Form>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="bg-blue-500 text-white p-2 rounded disabled:opacity-50"
+        >
+          {isLoading ? "Entrando..." : "Entrar"}
+        </button>
+      </form>
     </div>
   );
 }

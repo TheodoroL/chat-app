@@ -1,5 +1,5 @@
-import { useContext } from "react";
-import { Form, redirect } from "react-router";
+import { useContext, useEffect } from "react";
+import { redirect, useNavigate } from "react-router";
 import { AuthContext } from "~/context/AuthController";
 
 export function meta() {
@@ -9,12 +9,23 @@ export function meta() {
   ];
 }
 
-export async function action() {
+export async function loader({ request }: { request: Request }) {
+  const cookieHeader = request.headers.get("Cookie");
+  const token = cookieHeader
+    ?.split(";")
+    .find((c) => c.trim().startsWith("authToken="))
+    ?.split("=")[1];
+
+  if (token) {
+    return redirect("/");
+  }
   return null;
 }
 
 export default function Register() {
   const context = useContext(AuthContext);
+  const navigate = useNavigate();
+
   if (!context) {
     throw new Error("AuthContext não encontrado");
   }
@@ -24,16 +35,24 @@ export default function Register() {
     createUser,
     isLoading,
     isRegisterError,
+    authToken,
   } = context;
+
+  useEffect(() => {
+    if (authToken) {
+      navigate("/");
+    }
+  }, [authToken, navigate]);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    createUser(e as unknown as React.SubmitEvent<HTMLFormElement>);
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-        <Form
-          method="post"
-          onSubmit={createUser}
-          className="flex flex-col gap-6"
-        >
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <h2 className="text-3xl font-bold text-center text-gray-800">
             Registrar-se
           </h2>
@@ -109,12 +128,13 @@ export default function Register() {
           )}
 
           <button
+            type="submit"
             className="bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white font-semibold p-3 rounded-lg transition-colors w-full"
             disabled={isLoading}
           >
             {isLoading ? "Cadastrando..." : "Cadastrar"}
           </button>
-        </Form>
+        </form>
       </div>
     </div>
   );
