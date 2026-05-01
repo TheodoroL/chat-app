@@ -25,3 +25,21 @@ GET {{url}}users/
 
 ###
 GET {{url}}users/find/69ea8a0448bc3ffcd7bd3ca0
+
+
+###
+GET {{url}}chats/user/69ea8a0448bc3ffcd7bd3ca0
+
+
+### Create Chat
+POST {{url}}chats/create
+Content-Type: application/json
+
+
+{
+  "firstId": "69ea8a0448bc3ffcd7bd3ca0",
+  "secondId": "69ea8a0448bc3ffcd7bd3ca0"
+}
+
+### Find Chat
+GET {{url}}chats/find/69ea8a0448bc3ffcd7bd3ca0/69ea8a0448bc3ffcd7bd3ca0

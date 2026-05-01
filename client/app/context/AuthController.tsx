@@ -5,46 +5,13 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useNavigate } from "react-router";
+import type { AuthContextType } from "~/models/AuthContextType";
+import type { LoginFormData } from "~/models/LoginFormData";
+import type { MessageErrorResponse } from "~/models/MessageErrorResponse";
+import type { RegisterFormData } from "~/models/RegisterFormData";
+import type { TokenResponse } from "~/models/TokenResponse";
 import { API_BASE_URL, postRequest } from "~/utils/serivce";
-
-interface RegisterFormData {
-  name: string;
-  email: string;
-  password: string;
-}
-
-interface LoginFormData {
-  email: string;
-  password: string;
-}
-
-interface User {
-  name: string;
-  email: string;
-}
-
-interface TokenResponse {
-  token: string;
-  user: User;
-}
-interface MessageErrorResponse {
-  message: string | string[];
-}
-
-interface AuthContextType {
-  authToken: TokenResponse | null;
-  setAuthToken: (authToken: TokenResponse | null) => void;
-  registerUser: RegisterFormData;
-  loginData: LoginFormData;
-  setLoginData: (data: LoginFormData) => void;
-  isAuthenticated: boolean;
-  updateRegisterInfo: (info: RegisterFormData) => void;
-  logout: () => void;
-  isLoading: boolean;
-  isRegisterError: MessageErrorResponse | null;
-  createUser: (e: React.SubmitEvent<HTMLFormElement>) => Promise<void>;
-  loginUser: () => Promise<void>;
-}
 
 export const AuthContext = createContext<AuthContextType | undefined>(
   undefined,
@@ -71,6 +38,7 @@ function removeTokenCookie() {
 export function AuthContextProvider({
   children,
 }: AuthContextProviderProps): ReactNode {
+  const navigate = useNavigate();
   const [authToken, setAuthToken] = useState<TokenResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRegisterError, setIsRegisterError] =
@@ -101,7 +69,6 @@ export function AuthContextProvider({
     }
   }, []);
 
-  console.log(authToken);
   const updateRegisterInfo = useCallback((info: RegisterFormData) => {
     setRegisterUser(info);
   }, []);
@@ -201,10 +168,16 @@ export function AuthContextProvider({
 
   const isAuthenticated = authToken !== null;
 
-  const logout = (): void => {
+  const logout = useCallback(async (): Promise<void> => {
     setAuthToken(null);
     removeTokenCookie();
-  };
+    // Limpar dados locais
+    setLoginData({ email: "", password: "" });
+    setRegisterUser({ name: "", email: "", password: "" });
+    setIsRegisterError(null);
+    // Redirecionar para login
+    navigate("/login");
+  }, [navigate]);
 
   const value: AuthContextType = {
     authToken,

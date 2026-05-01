@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 
 import { env } from "./env.js";
 import { registerUserRoutes } from "./routes/user.route.js";
+import registerChatRoutes from "./routes/chat.route.js";
 
 const app = fastify({ logger: env.isDev });
 
@@ -13,6 +14,7 @@ app.register(cors, {
 });
 
 app.register(registerUserRoutes, { prefix: "/api/users" });
+app.register(registerChatRoutes, { prefix: "/api/chats" });
 
 mongoose
   .connect(env.MONGO_URI)

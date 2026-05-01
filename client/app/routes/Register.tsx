@@ -1,5 +1,5 @@
 import { useContext, useEffect } from "react";
-import { redirect, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { AuthContext } from "~/context/AuthController";
 
 export function meta() {
@@ -7,19 +7,6 @@ export function meta() {
     { title: "Cadastro" },
     { name: "description", content: "Página de cadastro de usuários." },
   ];
-}
-
-export async function loader({ request }: { request: Request }) {
-  const cookieHeader = request.headers.get("Cookie");
-  const token = cookieHeader
-    ?.split(";")
-    .find((c) => c.trim().startsWith("authToken="))
-    ?.split("=")[1];
-
-  if (token) {
-    return redirect("/");
-  }
-  return null;
 }
 
 export default function Register() {

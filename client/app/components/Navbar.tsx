@@ -1,11 +1,10 @@
-import { Link, NavLink, useNavigate } from "react-router";
+import { Link, NavLink } from "react-router";
 import { useContext, useState } from "react";
 import { AuthContext } from "~/context/AuthController";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const context = useContext(AuthContext);
-  const navigate = useNavigate();
 
   if (!context) {
     throw new Error("AuthContext não encontrado");
@@ -13,9 +12,8 @@ export default function Navbar() {
 
   const { authToken, logout } = context;
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
+  const handleLogout = async () => {
+    await logout();
   };
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -71,9 +69,7 @@ export default function Navbar() {
       {open && (
         <nav className="md:hidden flex flex-col gap-4 px-4 pb-4 border-t border-zinc-700">
           <span className="text-amber-400 text-sm mt-2">
-            {authToken?.user
-              ? `Logado como: ${authToken.user.name}`
-              : "Visitante"}
+            {authToken?.user ? `Logado como: ${authToken.user.name}` : ""}
           </span>
 
           {!authToken ? (
@@ -95,9 +91,9 @@ export default function Navbar() {
             </>
           ) : (
             <button
-              onClick={() => {
-                logout();
+              onClick={async () => {
                 setOpen(false);
+                await logout();
               }}
               className="text-left text-red-400 hover:text-red-300"
             >
