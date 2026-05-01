@@ -13,7 +13,6 @@ import Navbar from "./components/Navbar";
 import { AuthContextProvider } from "./context/AuthController";
 
 export const links: Route.LinksFunction = () => [
-  { rel: "manifest", href: "/manifest.json" },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",
