@@ -4,38 +4,13 @@ import { AuthContext } from "~/context/AuthController";
 
 export function meta() {
   return [
-    { title: "Register" },
-    { name: "description", content: "This is the register page." },
+    { title: "Cadastro" },
+    { name: "description", content: "Página de cadastro de usuários." },
   ];
 }
 
-export async function action({ request }: { request: Request }) {
-  const formData = await request.formData();
-
-  const username = formData.get("username");
-  const email = formData.get("email");
-  const password = formData.get("password");
-
-  // validação básica
-  if (!username || !email || !password) {
-    return { error: "Preencha todos os campos" };
-  }
-
-  // chamada para seu backend
-  const res = await fetch("http://localhost:3000/register", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ username, email, password }),
-  });
-
-  if (!res.ok) {
-    return { error: "Erro ao registrar usuário" };
-  }
-
-  // redireciona após sucesso
-  return redirect("/login");
+export async function action() {
+  return null;
 }
 
 export default function Register() {
@@ -43,59 +18,104 @@ export default function Register() {
   if (!context) {
     throw new Error("AuthContext não encontrado");
   }
-  const { registerUser, updateRegisterInfo } = context;
+  const {
+    registerUser,
+    updateRegisterInfo,
+    createUser,
+    isLoading,
+    isRegisterError,
+  } = context;
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <Form method="post" className="flex flex-col gap-4 w-80">
-        <h2 className="text-2xl font-bold text-center">Registrar-se</h2>
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-96">
+        <Form
+          method="post"
+          onSubmit={createUser}
+          className="flex flex-col gap-6"
+        >
+          <h2 className="text-3xl font-bold text-center text-gray-800">
+            Registrar-se
+          </h2>
 
-        <div className="flex flex-col">
-          <label htmlFor="username">Nome</label>
-          <input
-            className="p-2 border rounded"
-            type="text"
-            id="username"
-            name="username"
-            value={registerUser.username}
-            onChange={(e) =>
-              updateRegisterInfo({ ...registerUser, username: e.target.value })
-            }
-          />
-        </div>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="name" className="font-medium text-gray-700">
+              Nome
+            </label>
+            <input
+              className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              type="text"
+              id="name"
+              name="name"
+              value={registerUser.name}
+              onChange={(e) =>
+                updateRegisterInfo({ ...registerUser, name: e.target.value })
+              }
+              placeholder="Seu nome completo"
+            />
+          </div>
 
-        <div className="flex flex-col">
-          <label htmlFor="email">Email</label>
-          <input
-            className="p-2 border rounded"
-            type="email"
-            id="email"
-            name="email"
-            value={registerUser.email}
-            onChange={(e) =>
-              updateRegisterInfo({ ...registerUser, email: e.target.value })
-            }
-          />
-        </div>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="email" className="font-medium text-gray-700">
+              Email
+            </label>
+            <input
+              className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              type="email"
+              id="email"
+              name="email"
+              value={registerUser.email}
+              onChange={(e) =>
+                updateRegisterInfo({ ...registerUser, email: e.target.value })
+              }
+              placeholder="seu@email.com"
+            />
+          </div>
 
-        <div className="flex flex-col">
-          <label htmlFor="password">Senha</label>
-          <input
-            className="p-2 border rounded"
-            type="password"
-            id="password"
-            name="password"
-            value={registerUser.password}
-            onChange={(e) =>
-              updateRegisterInfo({ ...registerUser, password: e.target.value })
-            }
-          />
-        </div>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="password" className="font-medium text-gray-700">
+              Senha
+            </label>
+            <input
+              className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              type="password"
+              id="password"
+              name="password"
+              value={registerUser.password}
+              onChange={(e) =>
+                updateRegisterInfo({
+                  ...registerUser,
+                  password: e.target.value,
+                })
+              }
+              placeholder="Mínimo 6 caracteres"
+            />
+          </div>
 
-        <button className="bg-blue-500 text-white p-2 rounded">
-          Cadastrar
-        </button>
-      </Form>
+          {isRegisterError && (
+            <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg">
+              {Array.isArray(isRegisterError.message) ? (
+                isRegisterError.message.map((msg, index) => (
+                  <p key={index} className="text-sm">
+                    • {typeof msg === "string" ? msg : "Erro desconhecido"}
+                  </p>
+                ))
+              ) : typeof isRegisterError.message === "string" ? (
+                <p className="text-sm">{isRegisterError.message}</p>
+              ) : (
+                <p className="text-sm">Erro ao processar o registro</p>
+              )}
+            </div>
+          )}
+
+          <button
+            className="bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white font-semibold p-3 rounded-lg transition-colors w-full"
+            disabled={isLoading}
+          >
+            {isLoading ? "Cadastrando..." : "Cadastrar"}
+          </button>
+        </Form>
+      </div>
     </div>
   );
 }

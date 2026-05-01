@@ -29,7 +29,7 @@ export async function RegisterUser(req: FastifyRequest, reply: FastifyReply) {
     reply.status(200).send({ token: createToken });
   } catch (err) {
     console.error(err);
-    return reply.status(500).send({ error: "Internal server error" });
+    return reply.status(500).send({ message: "Internal server error" });
   }
 }
 
@@ -57,7 +57,7 @@ export async function LoginUser(req: FastifyRequest, reply: FastifyReply) {
     reply.status(200).send({ token: createToken });
   } catch (err) {
     console.error(err);
-    return reply.status(500).send({ error: "Internal server error" });
+    return reply.status(500).send({ message: "Internal server error" });
   }
 }
 
